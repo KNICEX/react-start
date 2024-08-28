@@ -1,30 +1,56 @@
 import { useState } from 'react'
 import './tictactoe.css'
 
-const Square = ({value, onClick}: {value: string, onClick:()=>void}) => {
+const Square = ({value, onClick}: {value: string|null, onClick:()=>void}) => {
 	return <button className='square' onClick={onClick}>{value}</button>
 }
 
-const Tictactoe = () => {
-	const [xIsNext, setXIsNext] = useState(true)
-	const [squares, setSquares] = useState(Array(9).fill(null))
-	
+const calculateWinner = (squares: Array<string|null>) => {
+	const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+  ];
+
+  for (let i = 0; i < lines.length; i ++) {
+	const [a, b, c] = lines[i]
+	if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+		return squares[a]
+	}
+  }
+  return null
+}
+
+const Board = ({xIsNext, squares, onPlay}: {xIsNext: boolean, squares: Array<string|null>, onPlay:(arg0: Array<string|null>)=>void }) => {
+	const winner = calculateWinner(squares)
+	let status;
+	if (winner) {
+		status = 'Winner: ' + winner
+	} else {
+		status = 'Next player: ' + (xIsNext ? 'X' : 'O')
+	}
+
 	const handleClick = (i: number) => {
-		if (squares[i]) {
+		if (squares[i] || calculateWinner(squares)) {
 			return
 		}
-		const newSquares = squares.slice()
+		const nextSquares = squares.slice()
 		if (xIsNext) {
-			newSquares[i] = 'X'
+			nextSquares[i] = 'X'
 		} else {
-			newSquares[i] = 'O'
+			nextSquares[i] = 'O'
 		}
-		setSquares(newSquares)
-		setXIsNext(!xIsNext)
+		onPlay(nextSquares)
 	}
 	
 	return (
 		<>
+			<div className="status">{status}</div>
 			<div className="board-row">
 				<Square value={squares[0]} onClick={() => handleClick(0)}></Square>
 				<Square value={squares[1]} onClick={() => handleClick(1)}></Square>
@@ -44,4 +70,25 @@ const Tictactoe = () => {
 	)
 }
 
-export default Tictactoe
+const Game = () => {
+	const [xIsNext, setXIsNext] = useState(true)
+	const [history, setHistory] = useState([Array(9).fill(null)])
+
+	const currentSquares = history[history.length - 1]
+	const handlePlay = (nextSquares: Array<string|null>)=> {
+		setHistory([...history, nextSquares])
+		setXIsNext(!xIsNext)
+	}
+	return (
+		<div className="game">
+			<div className="game-board">
+				<Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay}></Board>
+			</div>
+			<div className="game-info">
+				<ol></ol>
+			</div>
+		</div>
+	)
+}
+
+export default Game

@@ -1,10 +1,10 @@
 import App from "../App"
 import { useState } from "react"
-import Tictactoe from "../views/Tictactoe"
+import Board from "../views/Tictactoe"
 
 const rourtes = new Map<string, JSX.Element>()
 rourtes.set('/', <App></App>)
-rourtes.set('/tictactoe', <Tictactoe></Tictactoe>)
+rourtes.set('/tictactoe', <Board></Board>)
 
 function Router  ()  {
     const path = window.location.pathname
